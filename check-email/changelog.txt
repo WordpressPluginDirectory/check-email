@@ -1,5 +1,8 @@
 == Changelog ==
 
+= v1.0.12.1 - 30/05/2024 =
+- Fixed: Parse error after recent update #73
+
 = v1.0.12 - 29/05/2024 =
 - Feature: Feature to export logs #49
 - Feature: Added feedback form on plugin deactivation #61
