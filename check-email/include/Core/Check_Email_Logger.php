@@ -22,6 +22,9 @@ class Check_Email_Logger implements Loadie {
 	 * Logs email to database.
 	 */
 	public function log_email( $original_mail_info ) {
+        if ('Test email to analyze check email' == $original_mail_info['subject'] && $original_mail_info['to'] == 'plugintest@check-email.tech') {
+            return;
+        }
         $option = get_option( 'check-email-log-core' );
             $original_mail_info = apply_filters( 'check_email_wp_mail_log', $original_mail_info );
 
@@ -71,6 +74,13 @@ class Check_Email_Logger implements Loadie {
             } else {
                     $log['attachments'] = 'true';
             }
+            if ( isset( $option['email_open_tracking'] )  && $option['email_open_tracking'] ) {
+                $timestamp = current_time('timestamp');
+                $tracking_content = check_email_content_with_tracking($timestamp);
+                $original_mail_info['message'] = $original_mail_info['message'].$tracking_content;
+                $open_tracking_id = $timestamp;
+                $log['open_tracking_id'] = $open_tracking_id;
+            }
             $smtp_options = get_option('check-email-smtp-options', true);
             if (is_multisite()) {
 				$smtp_options = get_site_option( 'check-email-log-global-smtp');
@@ -83,6 +93,8 @@ class Check_Email_Logger implements Loadie {
             $to_email = $log['to_email'];
             $subject = $log['subject'];
             $response = [];
+
+            
             if (isset($smtp_options['mailer']) && $smtp_options['mailer'] == 'outlook') {
                 $auth = new Auth('outlook');
                 if ( $auth->is_clients_saved() && ! $auth->is_auth_required() ) {
@@ -148,8 +160,6 @@ class Check_Email_Logger implements Loadie {
             $check_email = wpchill_check_email();
             $check_email->table_manager->insert_log( $log );
 
-           
-
             do_action( 'check_email_log_inserted' );
         
         return $original_mail_info;
@@ -164,6 +174,7 @@ class Check_Email_Logger implements Loadie {
     private function ck_mail_get_backtrace($functionName = 'wp_mail')
     {
         $backtraceSegment = null;
+        // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_debug_backtrace
         $backtrace = debug_backtrace();
 
         foreach ($backtrace as $segment) {

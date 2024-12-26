@@ -22,18 +22,27 @@ class Check_Email_Multisite {
 	}
 	public function check_mail_handle_outlook_callback() {
 		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Reason: We are not processing form
-		if ( isset( $_GET['code'] ) && !empty( $_GET['code'] ) && isset( $_GET['state'] ) && !empty( $_GET['state'] )) {
+		if ( isset( $_GET['code'] ) && !empty( $_GET['code'] ) && isset( $_GET['state'] ) && !empty( $_GET['state'] ) && strpos(sanitize_text_field( wp_unslash($_GET['state'])), 'check-email-nonce_') !== false ) {
+			// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Reason: We are not processing form
+			$state = str_replace("check-email-nonce_", "", sanitize_text_field( wp_unslash($_GET['state']) ) );
+			$nonce = $state;
+			$smtp_options = get_site_option('check-email-log-global-smtp');
+			if (isset($smtp_options['enable_global']) && ! empty($smtp_options['enable_global']) && is_multisite()) {
+				$redirect_url = network_admin_url('admin.php?page=check-mail-global-settings&tab=smtp' );
+			}else{
+				$redirect_url = admin_url('admin.php?page=check-email-settings&tab=smtp' );
+			}
+
+			if ( ! wp_verify_nonce( $nonce, 'ck_mail_outlook_check_nonce' ) ) {
+				$url = add_query_arg( 'error', 'Microsoft invalid nonce', $redirect_url );
+				wp_safe_redirect( $url );
+				exit;
+			}
 			// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Reason: We are not processing form
 			$auth = new Auth( 'outlook' );
 			// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Reason: We are not processing form
 			$auth->update_auth_code( sanitize_text_field( wp_unslash( $_GET['code'] ) ) );
-			$smtp_options = get_site_option('check-email-log-global-smtp');
-			if (isset($smtp_options['enable_global']) && ! empty($smtp_options['enable_global']) && is_multisite()) {
-				$url = network_admin_url('admin.php?page=check-mail-global-settings&tab=smtp' );
-			}else{
-				$url = admin_url('admin.php?page=check-email-settings&tab=smtp' );
-			}
-			wp_safe_redirect( $url );
+			wp_safe_redirect( $redirect_url );
 			exit;
 		}
 		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Reason: We are not processing form
@@ -96,7 +105,7 @@ class Check_Email_Multisite {
 					// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Reason: We are not processing form
 					$error_message = sanitize_text_field( wp_unslash( $_GET['error_description'] ) );
 				?>	<div class="notice notice-error is-dismissible">
-						<h3><?php esc_html_e( 'Its an error to linking with microsoft 365 / outlook' ); ?></h3>
+						<h3><?php esc_html_e( 'Its an error to linking with microsoft 365 / outlook', 'check-email' ); ?></h3>
 						<p><?php echo esc_html( $error_message ); ?></p>
 					</div>
 				<?php
@@ -213,15 +222,24 @@ class Check_Email_Multisite {
 									<div class="ce_radio-container">
 										<label class="ce_radio-label <?php echo $mailer == 'smtp' ? "ck_radio_selected" : ''; ?>">
 											<input  class="check_email_mailer_type_multi" type="radio" name="check-email-log-global[mailer]" value="smtp" <?php echo $mailer == 'smtp' ? "checked" : ''; ?> id="check-email-mailer-general-smtp">
+											<?php // phpcs:ignore PluginCheck.CodeAnalysis.ImageFunctions.NonEnqueuedImage ?>
 											<img src="<?php echo esc_attr($plugin_dir_url . 'assets/images/smtp.svg') ?>" alt="SMTP Icon">
 											<div class="ce_radio-title"><?php esc_html_e('General SMTP','check-email'); ?></div>
 										</label>
 
 										<label class="ce_radio-label <?php echo $mailer == 'outlook' ? "ck_radio_selected" : ''; ?>" >
 											<input class="check_email_mailer_type_multi" type="radio" name="check-email-log-global[mailer]" value="outlook" <?php echo $mailer == 'outlook' ? "checked" : ''; ?> id="check-email-mailer-outlook">
+											<?php // phpcs:ignore PluginCheck.CodeAnalysis.ImageFunctions.NonEnqueuedImage ?>
 											<img src="<?php echo esc_attr($plugin_dir_url . 'assets/images/microsoft.svg') ?>" alt="Outlook Icon">
 											<div class="ce_radio-title"><?php esc_html_e('365 / Outlook','check-email'); ?></div>
 										</label>
+
+										<label class="ce_radio-label <?php echo $mailer == 'gmail' ? "ck_radio_selected" : ''; ?>" >
+										<input class="check_email_mailer_type_multi" type="radio" name="check-email-smtp-options[mailer]" value="gmail" <?php echo $mailer == 'gmail' ? "checked" : ''; ?>>
+										<?php // phpcs:ignore PluginCheck.CodeAnalysis.ImageFunctions.NonEnqueuedImage ?>
+										<img src="<?php echo esc_attr($plugin_dir_url . 'assets/images/gmail.png') ?>" alt="Gmail Icon">
+										<div class="ce_radio-title"><?php esc_html_e('Gmail','check-email'); ?></div>
+									</label>
 									</div>
 								</td>
 							</tr>

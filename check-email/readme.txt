@@ -2,9 +2,9 @@
 Contributors: checkemail
 Tags: logging, email, email log, smtp, log
 Requires at least: 5.0
-Tested up to: 6.6
+Tested up to: 6.7
 Requires PHP: 5.6.20
-Stable tag: 2.0.2
+Stable tag: 2.0.4
 License: GPLv3 or later
 License URI: http://www.gnu.org/licenses/gpl-3.0.html
 
@@ -33,6 +33,7 @@ This WordPress plugin helps you store sent emails for auditing purposes, as well
 - <strong>Multisite Configure</strong> - Its allow to configure global setting for all your sites. 
 - <strong>Encoding</strong> - Its allow to encode emails and phone in page content. 
 - <strong>Outlook / MS 360</strong> - Its allow to send email using 360 / outlook configuration. 
+- <strong>Email Spam Testing</strong> - Its allow to testing of your mail for accurate delivery.
 
 == Features of the plugin Check & Log Email ==
 
@@ -113,6 +114,20 @@ Someone using one of my other plugins had trouble with emails not being sent. I 
 
 == Changelog ==
 
+= v2.0.4 - 26/12/2024 =
+- Enhancement: Notice "Function _load_textdomain_just_in_time was called incorrectly" since wp 6.7 #116
+- Enhancement: Few improvement needed #112
+- Enhancement: Make an option to use one SMTP settings for multisite #97
+- Feature: Email Spam Analyzer #119
+- Fixed: Php error #117
+
+= v2.0.3 - 06/11/2024 =
+- Enhancement: Email Logs Show Failure as Success #113
+- Feature: Added an option for Opened mails data #79
+- Feature: Added Gmail mailer in smtp section #106
+- Feature: Added a feature to send the bulk email. #107
+- Fixed: Login OAuth Broken After Updating Check-Email Plugin to 2.0.2 #108
+
 = v2.0.2 - 27/09/2024 =
 - Feature: Added an option to use one SMTP settings for multisite #97
 - Feature: Added encoding of email and phone #55
@@ -162,9 +177,5 @@ Someone using one of my other plugins had trouble with emails not being sent. I 
 
 = v1.0.10 - 14/03/2024 =
 - Fixed: Resolved security issue raised by Wordfence
-
-= v1.0.9 - 07/03/2024 =
-- Fixed: php8.2 deprecation warning #53
-- Enhancement: Added Support Form #56
 
 Full changelog available [ at changelog.txt](https://plugins.svn.wordpress.org/check-email/trunk/changelog.txt)

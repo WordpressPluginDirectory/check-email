@@ -55,6 +55,7 @@ class Check_Email_Wizard_Page extends Check_Email_BasePage {
 		
         <div class="wrap_div">
             <div class="container">
+            <?php // phpcs:ignore PluginCheck.CodeAnalysis.ImageFunctions.NonEnqueuedImage ?>
                 <img src="<?php echo esc_attr($plugin_dir_url . 'assets/images/check-log-email.png') ?>" alt="Check & Log" class="logo" width="250px">
                 <h1><?php echo esc_html__( 'Check & Log Email', 'check-email' ); ?></h1>
                 <!-- <p class="product">a wpforms product</p> -->
@@ -77,6 +78,7 @@ class Check_Email_Wizard_Page extends Check_Email_BasePage {
             <div class="cm_step_container">
                 <div class="cm_loader" id="cm-container-loader"></div>
                 <div class="cm_logo">
+                <?php // phpcs:ignore PluginCheck.CodeAnalysis.ImageFunctions.NonEnqueuedImage ?>
                     <img src="<?php echo esc_attr($plugin_dir_url . 'assets/images/check-log-email.png') ?>" alt="" width="100">
                 </div>
                 <div class="cm_progress">
@@ -141,7 +143,7 @@ class Check_Email_Wizard_Page extends Check_Email_BasePage {
         $html = "";
         $html .='<ul class="cm_checklist">
             <li>
-                <span>'. esc_html( "Administrator", "check-email" ).'</span>
+                <span>'. esc_html__( "Administrator", "check-email" ).'</span>
                 <span class="checkmark">&#10003;</span>
             </li>';
             foreach ( $available_roles as $role_id => $role ){

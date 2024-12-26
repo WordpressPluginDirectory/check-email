@@ -124,6 +124,12 @@ class Check_Email_Log_List_Action implements Loadie {
 					<td style="padding: 5px;"><b><?php esc_html_e( 'Headers', 'check-email' ); ?></b>:</td>
 					<td style="padding: 5px;"><?php echo esc_html( $log_item['headers'] ); ?></td>
 				</tr>
+				<?php if(isset( $option['email_open_tracking']) && $option['email_open_tracking'] ) {  ?>
+				<tr style="background: #eee;">
+					<td style="padding: 5px;"><b><?php esc_html_e( 'Email Opened', 'check-email' ); ?></b>:</td>
+					<td style="padding: 5px;"><?php echo ($log_item['open_count']) ?  esc_html( $log_item['open_count'] ) : 0; ?></td>
+				</tr>
+				<?php } ?>
 
 				<?php do_action( 'check_email_view_log_after_headers', $log_item ); ?>
 
@@ -148,10 +154,14 @@ class Check_Email_Log_List_Action implements Loadie {
 					if(empty($option) || !isset( $option['log_email_content']) || (isset( $option['log_email_content'])) && $option['log_email_content']){
 					?>
 				<div id="tabs-text">
-					<pre class="tabs-text-pre"><?php echo esc_textarea( $log_item['message'] ); ?></pre>
+					<?php
+						// Regular expression to match and remove <img> tags with class="check-email-tracking"
+						$email_content_without_img = preg_replace('/<img[^>]*class=[\'\"]check-email-tracking[\'\"][^>]*>/i', '', $log_item['message']);
+					?>
+					<pre class="tabs-text-pre"><?php echo esc_textarea( $email_content_without_img ); ?></pre>
 				</div>
 				<div id="tabs-preview">
-					<?php echo wp_kses( $log_item['message'], $this->check_email_kses_allowed_html( 'post' ) ); ?>
+					<?php echo wp_kses( $email_content_without_img, $this->check_email_kses_allowed_html( 'post' ) ); ?>
 					<?php
 					if (!empty($log_item['attachment_name'])) {
 						$attachments = explode(',',$log_item['attachment_name']);
@@ -160,9 +170,10 @@ class Check_Email_Log_List_Action implements Loadie {
 							<h4><?php esc_html_e( 'Attachments', 'check-email'); ?> </h4>
 							<?php
 							foreach ($attachments as $key => $attachment) {
-								?>
-								<img src="<?php echo esc_attr($attachment) ?>" height="100px" width="100px" />
-								<?php
+								echo wp_get_attachment_image($attachment, 'thumbnail', false, [
+											'class' => 'custom-class',
+											'style' => 'height: 100px; width: 100px;',
+										]);
 							}
 						}
 					}
@@ -427,7 +438,7 @@ class Check_Email_Log_List_Action implements Loadie {
 					<td style="padding: 5px; width:113px;"><b><?php esc_html_e( 'To', 'check-email' ); ?></b><span class="" style="color:red;">*</span></td>
 					<td style="padding: 5px;">
 						<input type="email" id="ckm_to" name="ckm_to" class="regular-text" value="<?php echo esc_attr( $log_item['to_email'] ); ?>" />
-						<small>&nbsp;<?php esc_html__( 'Separate multiple emails by comma ( , )', 'check-email' ); ?></small>
+						<small>&nbsp;<?php esc_html_e( 'Separate multiple emails by comma ( , )', 'check-email' ); ?></small>
 					</td>
 				</tr>
 				<tr style="background: #eee;">
@@ -477,9 +488,10 @@ class Check_Email_Log_List_Action implements Loadie {
 						<h4><?php esc_html_e( 'Attachments', 'check-email' ); ?></h4>
 						<?php
 						foreach ($attachments as $key => $attachment) {
-							?>
-							<img src="<?php echo esc_attr($attachment) ?>" height="100px" width="100px" />
-							<?php
+							echo wp_get_attachment_image($attachment, 'thumbnail', false, [
+								'class' => 'custom-class',
+								'style' => 'height: 100px; width: 100px;',
+							]);
 						}
 					}
 				}
@@ -519,7 +531,8 @@ class Check_Email_Log_List_Action implements Loadie {
 		$reply_to = ( isset($_POST['ckm_reply_to'] ) ) ? sanitize_text_field(wp_unslash($_POST['ckm_reply_to'])) : "";
 
 		$subject = ( isset($_POST['ckm_subject'] ) ) ? sanitize_text_field(wp_unslash($_POST['ckm_subject'])) : "";
-		$message = ( isset($_POST['ckm_message'] ) ) ? sanitize_textarea_field(wp_unslash($_POST['ckm_message'])) : "";
+		// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+		$message = ( isset($_POST['ckm_message'] ) ) ? wp_unslash($_POST['ckm_message']) : "";
 		$headers = array(
 		);
 		
@@ -535,7 +548,7 @@ class Check_Email_Log_List_Action implements Loadie {
 		if ( !empty( $bcc ) ){
 			$headers[] ='BCC: '.$bcc;
 		}
-		if ( !empty( $bcc ) ){
+		if ( !empty( $content_type ) ){
 			$headers[] ='Content-Type: '.$content_type;
 		}
 		if ( empty( $to )  || empty( $subject )){
@@ -587,7 +600,8 @@ class Check_Email_Log_List_Action implements Loadie {
 			echo wp_json_encode(array('status'=> 503, 'message'=> esc_html__( 'Unauthorized access, CSRF token not matched','check-email')));
 			wp_die();
 		}
-		set_time_limit(300);  
+		// phpcs:ignore Squiz.PHP.DiscouragedFunctions.Discouraged
+		set_time_limit(300);
         
         $plugin_name   = isset($_POST['plugin_name'])?sanitize_text_field(wp_unslash($_POST['plugin_name'])):'';          
         $is_plugin_active = false;
