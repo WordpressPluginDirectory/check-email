@@ -50,7 +50,14 @@ class Check_Email_Dashboard extends Check_Email_BasePage
             <div style="display:flex; align-items:center; justify-content:space-between;">
                 <h1 style="margin-left:5px;"><?php esc_html_e('Check & Log Email', 'check-email'); ?></h1>
                 <div>
-                    <?php echo apply_filters('pro_upgrade_banner', '', []); ?>
+                    <?php 
+                    // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound
+                    $banner = apply_filters('check_mail_pro_upgrade_banner', '', []);
+
+                    if ( ! empty( $banner ) ) {
+                        echo wp_kses_post( $banner );
+                    }
+                    ?>
                 </div>
             </div>
             <div class="ck_dashboard-container">
@@ -77,7 +84,7 @@ class Check_Email_Dashboard extends Check_Email_BasePage
                     <span class="ck_dashboard-free"><?php echo esc_html__('Free', 'check-email'); ?></span>
                     <hr/>
                     <p style="overflow:hidden;"><?php echo esc_html__('In need of a tool that allows you to easily log and view all emails sent from WordPress? Logs helps you store sent emails for auditing purposes, as well as debug email related problems in your site.', 'check-email'); ?></p>
-                    <a class="button button-primary" href="<?php echo esc_url('https://check-email.tech/docs/'); ?>"><?php echo esc_html__( "Go to Email Logs Module", 'check-email' ); ?></a>
+                    <a class="button button-primary" href="<?php echo esc_url(admin_url('admin.php?page=check-email-logs')); ?>"><?php echo esc_html__( "Go to Email Logs Module", 'check-email' ); ?></a>
                     <a class="ck_dashboard-learn-more" target="_blank" href="<?php echo esc_url('https://check-email.tech/docs/'); ?>"><?php echo esc_html__( "Learn More", 'check-email' ); ?></a>
                 </div>
                 

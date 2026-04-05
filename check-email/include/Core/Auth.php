@@ -2,8 +2,12 @@
 
 
 namespace CheckEmail\Core;
-
+// Exit if accessed directly
+if( !defined( 'ABSPATH' ) )
+    exit;
+// phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedVariableFound
 $check_email      = wpchill_check_email();
+// phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedVariableFound
 $plugin_path = plugin_dir_path($check_email->get_plugin_file());
 require_once $plugin_path . '/vendor/autoload.php';
 
@@ -93,6 +97,7 @@ class Auth
 				'urlAccessToken'          => $access_token_url,
 				'urlResourceOwnerDetails' => $resource_owner_details_url,
 				'scopes'                  => 'openid profile User.Read Mail.Read Mail.Send',
+				'scopeSeparator' 		  => ' ',
 			]
 		);
 
